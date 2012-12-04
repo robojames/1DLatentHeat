@@ -19,18 +19,26 @@ tic
 %% Build model by adding thermodynamic properties into array
 
 %% layer properties 
-
+k_SENSOR = 92.45;
+cp_SENSOR = 450;
+rho_SENSOR = 8049;
 
 % Layering Scheme: ceramic, copper, bismuth telluride, copper, ceramic, copper, glass,
 % bismuth telluride, copper, water, Type E themoelectric
 
-k=[35,223,1.48,223,35,1.4,223,1.2,223,(21.9+16.7),223,0.69]; %(W/mK)Thermal conductivity of layers (1,2,3..) 
-rho=[3750,8800,7700,8800,3750,2225,8800,7700,8800,8730,8800,1000];  % (kg/m^3)density of layers (1,2,3..)
-cp=[775,420,122,420,775,835,420,122,420,(4.07e-1+3.984e-1),420,4218.3]; % (J/kg*K)heat capacity of layers (1,2,3..)
-len=[0.0006858,0.0004318,0.00127,0.0004318,0.0006858,0.0001524,0.0001524,500e-6,1e-6,25e-6,499e-6,250e-6]; %(m)length of layers (1,2,3..)  %(m)length of layers (1,2,3..) 
+%k=[35,223,1.48,223,35,1.4,223,1.2,223,(21.9+16.7),223,0.69]; %(W/mK)Thermal conductivity of layers (1,2,3..) 
+k=[35,223,1.48,223,35,1.4,223,1.2,223, (21.9+16.7), 0.69]; %(W/mK)Thermal conductivity of layers (1,2,3..) 
+
+%rho=[3750,8800,7700,8800,3750,2225,8800,7700,8800,8730,8800,1000];  % (kg/m^3)density of layers (1,2,3..)
+rho=[3750,8800,7700,8800,3750,2225,8800,7700,8800, 8730,1000];  % (kg/m^3)density of layers (1,2,3..)
+
+%cp=[775,420,122,420,775,835,420,122,420,(4.07e-1+3.984e-1),420,4218.3]; % (J/kg*K)heat capacity of layers (1,2,3..) 499
+cp=[775,420,122,420,775,835,420,122,420, (4.07e-1+3.984e-1),4218.3]; % (J/kg*K)heat capacity of layers (1,2,3..) 499
+
+len=[0.0006858,0.0004318,0.00127,0.0004318,0.0006858,0.0001524,0.0001524,500e-6,1e-6,25e-6,250e-6]; %(m)length of layers (1,2,3..)  %(m)length of layers (1,2,3..) 
 %nodes=[round(len(1)/cvl),round(len(2)/cvl),round(len(3)/cv2),round(len(4)/cvl),round(len(5)/cvl),round(len(6)/cv3),round(len(7)/cv4)]; %nodes of layers (1,2,3..) 
 
- nodes=[500,600,1200,600,500,500,500,800,300,400,500,600];%mesh independent volume 
+ nodes=[500,600,1200,600,500,500,500,800,300,400,600];%mesh independent volume 
 
 
 %% Experimental Model Properties
@@ -73,9 +81,9 @@ Nak=24e-3;
 
 %% Latent Heat 
 Tm=273-23; %Freezing Temperature K
-Lm=334000; % Latent heat of melting J/Kg;
+Lm=0; % Latent heat of melting J/Kg;
 cs=211.0; % specific heat of ice (J/KgK); 
-cl=418.1; % specific heat of water (J/Kg/K); 
+cl=211.0; % specific heat of water (J/Kg/K); 
 flag=0; 
 count=0; 
     
@@ -145,9 +153,14 @@ if s==ts(z)
     s=0;  % then progress towards next timing loop and reset s
 end
 clc
-disp('percent complete')
-disp(z/length(t)*100) 
+
+
+%disp('percent complete')
+if (mod((z/length(t)),2)==0)
+    disp(z/length(t)*100) 
+end
 s=s+1;
+
 
 %% Natural Heat Transfer Coefficient 
 Ra=abs(real((9.81*Beta*(T(1,n(length(nodes))+1)-T_inf(2))*L^3)/(Nav*Naalpha))); %Rayleigh number
@@ -246,8 +259,8 @@ b(n(a)) = Ao(n(a))*T(1,n(a)) + sc(n(a))*cv(a);
  end
 
  %% Latent Heat
- p1=11; %node indexing of water only
- p2=11;
+ p1=10; %node indexing of water only
+ p2=10;
  Lim=0.2; %limits
  Mp=100; % Skewness of relaxation profile, Mp=1: Linear Line, Mp=1000: square wave
  for i = 2:nodes(p1+1)
@@ -341,4 +354,4 @@ Tlastnode(time+1,:)=T(1,5700);
  
 toc
 MM=[ttime',Tlastnode]; 
-xlswrite('Data',MM)
+xlswrite('Data_legitbaseline',MM)
